@@ -17,9 +17,6 @@ if [ "$1" == "php-fpm" ]; then
     # setup Selfoss, if necessary
     /usr/lib/selfoss/setup.sh
 
-    # initialize config
-    /usr/lib/selfoss/config.sh
-
     # unset forbidden Selfoss env variables
     # use container secrets instead
     unset \
@@ -36,6 +33,9 @@ if [ "$1" == "php-fpm" ]; then
         SELFOSS_USERNAME selfoss_username \
         SELFOSS_PASSWORD selfoss_password \
         SELFOSS_SALT selfoss_salt
+
+    # initialize config
+    /usr/lib/selfoss/config.sh
 
     # run crond
     crond -f -l 7 -L /dev/stdout &

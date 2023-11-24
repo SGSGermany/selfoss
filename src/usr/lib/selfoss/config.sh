@@ -23,10 +23,17 @@ read_secret() {
 }
 
 # reset config
+rm -f "/var/www/html/config.ini"
+
+touch "/var/www/html/config.ini"
+chown www-data:www-data "/var/www/html/config.ini"
+chmod 640 "/var/www/html/config.ini"
+
 {
     printf '[globals]\n';
     printf 'env_prefix=selfoss_\n';
-} > "/var/www/html/config.ini"
+    printf '\n';
+} >> "/var/www/html/config.ini"
 
 # database config
 MYSQL_USER="$(read_secret "selfoss_mysql_user")"
@@ -41,19 +48,19 @@ if [ -n "$MYSQL_USER" ] || [ -n "$MYSQL_PASSWORD" ] || [ -n "$MYSQL_DATABASE" ] 
     MYSQL_TABLE_PREFIX="${MYSQL_TABLE_PREFIX:-}"
 
     {
-        printf '\n';
         printf 'db_type=mysql\n';
         printf 'db_socket=/run/mysql/mysql.sock\n';
         [ -z "$MYSQL_USER" ] || printf "db_username=%s\n" "$MYSQL_USER";
         [ -z "$MYSQL_PASSWORD" ] || printf "db_password=%s\n" "$MYSQL_PASSWORD";
         [ -z "$MYSQL_DATABASE" ] || printf "db_database=%s\n" "$MYSQL_DATABASE";
         [ -z "$MYSQL_TABLE_PREFIX" ] || printf "db_prefix=%s\n" "$MYSQL_TABLE_PREFIX";
+        printf '\n';
     } >> "/var/www/html/config.ini"
 else
     {
-        printf '\n';
         printf 'db_type=sqlite\n';
         printf 'db_file=%%datadir%%/sqlite/selfoss.db\n';
+        printf '\n';
     } >> "/var/www/html/config.ini"
 fi
 
@@ -70,9 +77,17 @@ fi
 
 if [ -n "$AUTH_PUBLIC" ] || [ -n "$AUTH_USER" ] || [ -n "$AUTH_PASSWORD" ]; then
     {
-        printf '\n';
         [ -z "$AUTH_PUBLIC" ] || printf "public=%s\n" "$AUTH_PUBLIC";
         [ -z "$AUTH_USER" ] || printf "username=%s\n" "$AUTH_USER";
         [ -z "$AUTH_PASSWORD" ] || printf "password=%s\n" "$AUTH_PASSWORD";
+        printf '\n';
     } >> "/var/www/html/config.ini"
 fi
+
+# misc config
+env -0 | while IFS='=' read -r -d '' NAME VALUE; do
+    if echo "$NAME" | grep -q '^SELFOSS_[A-Z0-9][A-Z0-9_]*$'; then
+        NAME="$(echo "${NAME:8}" | tr '[:upper:]' '[:lower:]')"
+        printf "%s=%s\n" "$NAME" "$VALUE" >> "/var/www/html/config.ini"
+    fi
+done
