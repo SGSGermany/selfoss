@@ -1,0 +1,2 @@
+5-59/10 * * * * php -f /var/www/html/cliupdate.php > /dev/null 2>&1
+30 0 * * * /usr/lib/selfoss/truncate-logs.sh

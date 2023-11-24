@@ -37,6 +37,9 @@ if [ "$1" == "php-fpm" ]; then
     # initialize config
     /usr/lib/selfoss/config.sh
 
+    # truncate logfile
+    /usr/lib/selfoss/truncate-logs.sh
+
     # run crond
     crond -f -l 7 -L /dev/stdout &
 

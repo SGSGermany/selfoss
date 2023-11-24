@@ -143,9 +143,6 @@ user_add "$CONTAINER" mysql 65538
 echo + "rm …/etc/crontabs/root" >&2
 rm "$MOUNT/etc/crontabs/root"
 
-echo + "echo '5-59/10 * * * * php -f /var/www/html/cliupdate.php > /dev/null 2>&1' > …/etc/crontabs/www-data" >&2
-echo '5-59/10 * * * * php -f /var/www/html/cliupdate.php > /dev/null 2>&1' > "$MOUNT/etc/crontabs/www-data"
-
 # copy Selfoss sources to target image
 echo + "cp $(quote "<builder> …/usr/src/selfoss/selfoss-$VERSION.zip") …/usr/src/selfoss/selfoss.zip" >&2
 cp "$BUILD_MOUNT/usr/src/selfoss/selfoss-$VERSION.zip" "$MOUNT/usr/src/selfoss/selfoss.zip"

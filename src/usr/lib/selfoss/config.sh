@@ -86,6 +86,17 @@ fi
 
 # misc config
 env -0 | while IFS='=' read -r -d '' NAME VALUE; do
+    case "$NAME" in
+        "SELFOSS_LOGGER_DESTINATION"|"SELFOSS_LOGGER_SIZE_TARGET"|"SELFOSS_LOGGER_SIZE_MAX")
+            continue
+            ;;
+
+        "SELFOSS_LOGGER_FILE")
+            NAME="SELFOSS_LOGGER_DESTINATION"
+            VALUE="file:$VALUE"
+            ;;
+    esac
+
     if echo "$NAME" | grep -q '^SELFOSS_[A-Z0-9][A-Z0-9_]*$'; then
         NAME="$(echo "${NAME:8}" | tr '[:upper:]' '[:lower:]')"
         printf "%s=%s\n" "$NAME" "$VALUE" >> "/var/www/html/config.ini"
