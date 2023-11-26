@@ -87,7 +87,7 @@ fi
 # misc config
 env -0 | while IFS='=' read -r -d '' NAME VALUE; do
     case "$NAME" in
-        "SELFOSS_LOGGER_DESTINATION"|"SELFOSS_LOGGER_SIZE_TARGET"|"SELFOSS_LOGGER_SIZE_MAX")
+        "SELFOSS_VERSION"|"SELFOSS_LOGGER_DESTINATION"|"SELFOSS_LOGGER_SIZE_TARGET"|"SELFOSS_LOGGER_SIZE_MAX")
             continue
             ;;
 
