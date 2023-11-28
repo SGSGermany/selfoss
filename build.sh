@@ -80,34 +80,11 @@ else
 fi
 
 pkg_install "$BUILD_CONTAINER" \
-    curl \
-    gnupg \
     git \
     python3 \
     npm
 
-echo + "mkdir <builder> …/usr/src/composer" >&2
-mkdir "$BUILD_MOUNT/usr/src/composer"
-
-cmd buildah run "$BUILD_CONTAINER" -- \
-    curl -L -f -o "/usr/src/composer/composer.phar" "$COMPOSER_PHAR"
-
-cmd buildah run "$BUILD_CONTAINER" -- \
-    curl -L -f -o "/usr/src/composer/composer.phar.asc" "$COMPOSER_PHAR_ASC"
-
-for COMPOSER_GPG_KEY in $COMPOSER_GPG_KEYS; do
-    cmd buildah run "$BUILD_CONTAINER" -- \
-        gpg --keyserver "keyserver.ubuntu.com" --recv-keys "$COMPOSER_GPG_KEY"
-done
-
-cmd buildah run "$BUILD_CONTAINER" -- \
-    gpg --verify "/usr/src/composer/composer.phar.asc" "/usr/src/composer/composer.phar"
-
-cmd buildah run "$BUILD_CONTAINER" -- \
-    mv "/usr/src/composer/composer.phar" "/usr/local/bin/composer"
-
-cmd buildah run "$BUILD_CONTAINER" -- \
-    chmod +x "/usr/local/bin/composer"
+php_composer_install "$BUILD_CONTAINER"
 
 cmd buildah config \
     --env COMPOSER_ALLOW_SUPERUSER=1 \
