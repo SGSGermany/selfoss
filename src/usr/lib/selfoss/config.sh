@@ -50,10 +50,10 @@ if [ -n "$MYSQL_USER" ] || [ -n "$MYSQL_PASSWORD" ] || [ -n "$MYSQL_DATABASE" ] 
     {
         printf 'db_type=mysql\n';
         printf 'db_socket=/run/mysql/mysql.sock\n';
-        [ -z "$MYSQL_USER" ] || printf "db_username=%s\n" "$MYSQL_USER";
-        [ -z "$MYSQL_PASSWORD" ] || printf "db_password=%s\n" "$MYSQL_PASSWORD";
-        [ -z "$MYSQL_DATABASE" ] || printf "db_database=%s\n" "$MYSQL_DATABASE";
-        [ -z "$MYSQL_TABLE_PREFIX" ] || printf "db_prefix=%s\n" "$MYSQL_TABLE_PREFIX";
+        printf "db_username=%s\n" "$MYSQL_USER";
+        printf "db_password=%s\n" "$MYSQL_PASSWORD";
+        printf "db_database=%s\n" "$MYSQL_DATABASE";
+        printf "db_prefix=%s\n" "$MYSQL_TABLE_PREFIX";
         printf '\n';
     } >> "/var/www/html/config.ini"
 else
@@ -69,17 +69,26 @@ AUTH_PUBLIC="$(read_secret "selfoss_auth_public")"
 AUTH_USER="$(read_secret "selfoss_auth_user")"
 AUTH_PASSWORD="$(read_secret "selfoss_auth_password")"
 
-if [ -n "$AUTH_PUBLIC" ]; then
+if [ -n "$AUTH_USER" ] || [ -n "$AUTH_PASSWORD" ]; then
     [ "$AUTH_PUBLIC" == "1" ] \
         && AUTH_PUBLIC=1 \
         || AUTH_PUBLIC=0
-fi
 
-if [ -n "$AUTH_PUBLIC" ] || [ -n "$AUTH_USER" ] || [ -n "$AUTH_PASSWORD" ]; then
+    if [ -z "$AUTH_USER" ]; then
+        echo "Failed to setup Selfoss auth config: Invalid user provided ('selfoss_auth_user' secret)" >&2
+        exit 1
+    fi
+
+    if [ -z "$AUTH_PASSWORD" ] || [[ ! "$AUTH_PASSWORD" =~ ^\$[0-9][a-z]?\$[0-9][0-9]?\$[.\/A-Za-z0-9]{53}$ ]]; then
+        echo "Failed to setup Selfoss auth config: Invalid password provided ('selfoss_auth_password' secret)" >&2
+        exit 1
+    fi
+
     {
-        [ -z "$AUTH_PUBLIC" ] || printf "public=%s\n" "$AUTH_PUBLIC";
-        [ -z "$AUTH_USER" ] || printf "username=%s\n" "$AUTH_USER";
-        [ -z "$AUTH_PASSWORD" ] || printf "password=%s\n" "$AUTH_PASSWORD";
+        printf "public=%s\n" "$AUTH_PUBLIC";
+        printf "username=%s\n" "$AUTH_USER";
+        printf "password=%s\n" "$AUTH_PASSWORD";
+        printf "salt=\n";
         printf '\n';
     } >> "/var/www/html/config.ini"
 fi
