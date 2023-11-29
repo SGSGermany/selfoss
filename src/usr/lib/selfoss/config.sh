@@ -79,7 +79,7 @@ if [ -n "$AUTH_USER" ] || [ -n "$AUTH_PASSWORD" ]; then
         exit 1
     fi
 
-    if [ -z "$AUTH_PASSWORD" ] || [[ ! "$AUTH_PASSWORD" =~ ^\$[0-9][a-z]?\$[0-9][0-9]?\$[.\/A-Za-z0-9]{53}$ ]]; then
+    if [ -z "$AUTH_PASSWORD" ] || [ -z "$(echo "$AUTH_PASSWORD" | grep -E '^\$[0-9][a-z]?\$[0-9][0-9]?\$[./A-Za-z0-9]{53}$')" ]; then
         echo "Failed to setup Selfoss auth config: Invalid password provided ('selfoss_auth_password' secret)" >&2
         exit 1
     fi
